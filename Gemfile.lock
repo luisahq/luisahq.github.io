@@ -71,12 +71,14 @@ GEM
     terminal-table (2.0.0)
       unicode-display_width (~> 1.1, >= 1.1.1)
     unicode-display_width (1.8.0)
+    webrick (1.9.0)
 
 PLATFORMS
   x86_64-darwin-15
+  x86_64-linux
 
 DEPENDENCIES
-  jekyll (~> 4.2.1)
+  jekyll (~> 4.2.2)
   jekyll-feed (~> 0.12)
   kramdown-math-katex (~> 1.0.1)
   kramdown-parser-gfm
@@ -85,6 +87,7 @@ DEPENDENCIES
   tzinfo (~> 1.2)
   tzinfo-data
   wdm (~> 0.1.1)
+  webrick (~> 1.9.0)
 
 BUNDLED WITH
-   2.3.8
+   2.5.7
