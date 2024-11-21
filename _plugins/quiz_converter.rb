@@ -1,3 +1,5 @@
+require "perfect_toml"
+
 module Jekyll
   class QuizConverter < Converter
     safe true
@@ -13,17 +15,17 @@ module Jekyll
 
     def convert_quiz (node)
       if node.type == :codeblock && node.options[:lang] == 'quiz'
-        node.value = node.value << 'content modified'
+        hashmap = PerfectTOML.parse node.value
       end
 
       node.children.each do |child|
-        convert_quiz(child)
+        convert_quiz child
       end
     end
 
     def convert (content)
-      doc = Kramdown::Document.new(content, input: 'GFM')
-      convert_quiz(doc.root)
+      doc = Kramdown::Document.new content, input: 'GFM'
+      convert_quiz doc.root
       doc.to_html
     end
   end

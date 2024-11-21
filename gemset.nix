@@ -264,6 +264,16 @@
     };
     version = "0.16.2";
   };
+  perfect_toml = {
+    groups = ["default"];
+    platforms = [];
+    source = {
+      remotes = ["https://rubygems.org"];
+      sha256 = "1mpg01l8bprd14cdk47cxxgh57p2sjawil396hc23jcq56j0hdl6";
+      type = "gem";
+    };
+    version = "0.9.0";
+  };
   public_suffix = {
     groups = ["default" "jekyll_plugins"];
     platforms = [];
