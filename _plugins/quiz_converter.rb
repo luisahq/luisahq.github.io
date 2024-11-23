@@ -98,14 +98,33 @@ module Jekyll
       quiz['questions'].each do |question| normalize_question question end
     end
 
+    def convert_question (question)
+      node = Kramdown::Element.new :p
+      node.children = [Kramdown::Element.new(:text, question.to_s)]
+      node
+    end
+
+    def convert_quiz (quiz, node)
+      node.type = :html_element
+      node.value = 'div'
+      node.attr['class'] = 'quiz'
+      node.children = []
+
+      quiz['questions'].each do |question|
+        node.children << convert_question(question)
+      end
+    end
+
     def convert_quizzes (node)
       if node.type == :codeblock && node.options[:lang] == 'quiz'
         quiz = PerfectTOML.parse node.value
         normalize_quiz quiz
-        p quiz
+        convert_quiz quiz, node
       end
 
-      node.children.each do |child| convert_quizzes child end
+      node.children.each do |child|
+        convert_quizzes child
+      end
     end
 
     def convert (content)
