@@ -70,17 +70,28 @@ module Jekyll
           raise 'Choices must be an array.'
         end
 
-        if !question.has_key? 'answers'
-          raise 'Multiple choice question must have a "answers" key.'
+        if !question.has_key?('answer') && !question.has_key?('answers')
+          raise 'Multiple choice question must have an "answer[s]" key.'
         end
 
-        if !question['answers'].instance_of? Array
-          raise 'Answers must be an array.'
+        if question.has_key?('answer') && question.has_key?('answers')
+          raise 'Multiple choice question must have cannot have both "answer"'\
+                'and "answers" keys.'
         end
 
-        question['answers'].each do |answer|
-          if !answer.is_a? Integer
+        if question.has_key? 'answer'
+          if !question['answer'].is_a? Integer
             raise 'Multiple choice answer must be an integer.'
+          end
+        else
+          if !question['answers'].instance_of? Array
+            raise 'Answers must be an array.'
+          end
+
+          question['answers'].each do |answer|
+            if !answer.is_a? Integer
+              raise 'Multiple choice answer must be an integer.'
+            end
           end
         end
       end
@@ -98,38 +109,89 @@ module Jekyll
       quiz['questions'].each do |question| normalize_question question end
     end
 
-    def convert_question (question)
-      node = Kramdown::Element.new :p
-      node.children = [Kramdown::Element.new(:text, question.to_s)]
-      node
+    def convert_question (question, qzn, qn)
+      fieldset = Kramdown::Element.new :html_element
+      fieldset.value = 'fieldset'
+      fieldset.attr['id'] = 'quiz' + qzn.to_s + 'q' + qn.to_s
+      legend = Kramdown::Element.new :html_element
+      legend.value = 'legend'
+      legend.children = [Kramdown::Element.new(:text, question['question'])]
+      fieldset.children = [legend]
+
+      if question['type'] == 'shortanswer'
+        input = Kramdown::Element.new :html_element
+        input.value = 'input'
+        input.attr['type'] = 'text'
+        fieldset.children << input
+      else
+        qid = 'quiz' + qzn.to_s + 'q' + qn.to_s
+        type = question.has_key?('answer') ? 'radio' : 'checkbox'
+        a = 1
+
+        question['choices'].each do |choice|
+          input = Kramdown::Element.new :html_element
+          input.value = 'input'
+          id = qid + 'a' + a.to_s
+          input.attr['type'] = type
+          input.attr['id'] = id
+          input.attr['name'] = qid
+          label = Kramdown::Element.new :html_element
+          label.value = 'label'
+          label.attr['for'] = id
+          choice_text = choice.instance_of?(String) ? choice : choice.to_s
+          label.children = [Kramdown::Element.new(:text, choice_text)]
+          fieldset.children << input << label << Kramdown::Element.new(:br)
+          a += 1
+        end
+      end
+
+      fieldset
     end
 
-    def convert_quiz (quiz, node)
+    def convert_quiz (quiz, node, qzn)
       node.type = :html_element
-      node.value = 'div'
+      node.value = 'form'
+      node.attr['id'] = 'quiz' + qzn.to_s
       node.attr['class'] = 'quiz'
-      node.children = []
+      node.attr['action'] = ''
+      node.attr['method'] = 'get'
+      topic = Kramdown::Element.new :html_element
+      topic.value = 'div'
+      topic.attr['class'] = 'quiz-topic'
+      topic_text = (quiz.has_key?('topic') ? quiz['topic'] + ' ' : '') + 'Quiz'
+      topic.children = [Kramdown::Element.new(:text, topic_text)]
+      node.children = [topic]
+      qn = 1
 
       quiz['questions'].each do |question|
-        node.children << convert_question(question)
+        node.children << convert_question(question, qzn, qn)
+        qn += 1
       end
+
+      submit = Kramdown::Element.new :html_element
+      submit.value = 'button'
+      submit.attr['type'] = 'button'
+      submit.children = [Kramdown::Element.new(:text, 'Submit')]
+      node.children << submit
     end
 
-    def convert_quizzes (node)
+    def convert_quizzes (node, qzn)
       if node.type == :codeblock && node.options[:lang] == 'quiz'
         quiz = PerfectTOML.parse node.value
         normalize_quiz quiz
-        convert_quiz quiz, node
+        convert_quiz quiz, node, qzn
+        qzn += 1
       end
 
       node.children.each do |child|
-        convert_quizzes child
+        convert_quizzes child, qzn
       end
     end
 
     def convert (content)
+      qzn = 1
       doc = Kramdown::Document.new content, input: 'GFM'
-      convert_quizzes doc.root
+      convert_quizzes doc.root, qzn
       doc.to_html
     end
   end

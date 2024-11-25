@@ -5,6 +5,8 @@ within: programming
 ---
 
 ```quiz
+topic = "Syntax"
+
 [[questions]]
 type = "short answer"
 question = "What keyword is used to define a function in Python?"
