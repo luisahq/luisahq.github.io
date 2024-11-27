@@ -37,6 +37,10 @@ module Jekyll
 
       if !question.has_key? 'question'
         raise 'Question must have a "question" key.'
+
+        if !question['question'].instance_of? String
+          raise 'Question must be a string.'
+        end
       end
 
       if question.has_key? 'context'
@@ -68,6 +72,12 @@ module Jekyll
 
         if !question['choices'].instance_of? Array
           raise 'Choices must be an array.'
+        end
+
+        question['choices'].each do |choice|
+          if !choice.instance_of? String
+            raise 'Multiple choice option must be a string.'
+          end
         end
 
         if !question.has_key?('answer') && !question.has_key?('answers')
@@ -109,13 +119,24 @@ module Jekyll
       quiz['questions'].each do |question| normalize_question question end
     end
 
+    def text_to_ast (text)
+      Kramdown::Document.new(text, input: 'GFM').root.children[0].children
+    end
+
     def convert_question (question, qzn, qn)
       fieldset = Kramdown::Element.new :html_element
       fieldset.value = 'fieldset'
       fieldset.attr['id'] = 'quiz' + qzn.to_s + 'q' + qn.to_s
       legend = Kramdown::Element.new :html_element
       legend.value = 'legend'
-      legend.children = [Kramdown::Element.new(:text, question['question'])]
+      qn_el = Kramdown::Element.new :strong
+      qn_el.children = [Kramdown::Element.new(:text, qn.to_s + '. ')]
+      legend.children = [qn_el]
+
+      text_to_ast(question['question']).each do |node|
+        legend.children << node
+      end
+
       fieldset.children = [legend]
 
       if question['type'] == 'shortanswer'
@@ -138,8 +159,7 @@ module Jekyll
           label = Kramdown::Element.new :html_element
           label.value = 'label'
           label.attr['for'] = id
-          choice_text = choice.instance_of?(String) ? choice : choice.to_s
-          label.children = [Kramdown::Element.new(:text, choice_text)]
+          label.children = text_to_ast(choice)
           fieldset.children << input << label << Kramdown::Element.new(:br)
           a += 1
         end
@@ -150,21 +170,31 @@ module Jekyll
 
     def convert_quiz (quiz, node, qzn)
       node.type = :html_element
-      node.value = 'form'
+      node.value = 'div'
       node.attr['id'] = 'quiz' + qzn.to_s
       node.attr['class'] = 'quiz'
-      node.attr['action'] = ''
-      node.attr['method'] = 'get'
       topic = Kramdown::Element.new :html_element
       topic.value = 'div'
       topic.attr['class'] = 'quiz-topic'
       topic_text = (quiz.has_key?('topic') ? quiz['topic'] + ' ' : '') + 'Quiz'
       topic.children = [Kramdown::Element.new(:text, topic_text)]
       node.children = [topic]
+      start_btn = Kramdown::Element.new :html_element
+      start_btn.value = 'button'
+      start_btn.attr['type'] = 'button'
+      start_btn.attr['class'] = 'quiz-start-button'
+      start_btn.attr['disabled'] = true
+      start_btn.children = [Kramdown::Element.new(:text, 'JavaScript required')]
+      node.children << start_btn
+      form = Kramdown::Element.new :html_element
+      form.type = :html_element
+      form.value = 'form'
+      form.attr['action'] = ''
+      form.attr['method'] = 'get'
       qn = 1
 
       quiz['questions'].each do |question|
-        node.children << convert_question(question, qzn, qn)
+        form.children << convert_question(question, qzn, qn)
         qn += 1
       end
 
@@ -172,7 +202,8 @@ module Jekyll
       submit.value = 'button'
       submit.attr['type'] = 'button'
       submit.children = [Kramdown::Element.new(:text, 'Submit')]
-      node.children << submit
+      form.children << submit
+      node.children << form
     end
 
     def convert_quizzes (node, qzn)

@@ -16,10 +16,10 @@ answer = "def"
 type = "multiple choice"
 question = "Which of the following is a valid variable name in Python?"
 choices = [
-  "1_variable",
-  "variable-name",
-  "variable_name",
-  "class"
+  "`1_variable`",
+  "`variable-name`",
+  "`variable_name`",
+  "`class`"
 ]
-answers = [3]
+answer = 3
 ```
