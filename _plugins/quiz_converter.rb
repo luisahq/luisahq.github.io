@@ -191,6 +191,7 @@ module Jekyll
       form.value = 'form'
       form.attr['action'] = ''
       form.attr['method'] = 'get'
+      form.attr['class'] = 'hidden'
       qn = 1
 
       quiz['questions'].each do |question|
@@ -210,19 +211,30 @@ module Jekyll
       if node.type == :codeblock && node.options[:lang] == 'quiz'
         quiz = PerfectTOML.parse node.value
         normalize_quiz quiz
-        convert_quiz quiz, node, qzn
         qzn += 1
+        convert_quiz quiz, node, qzn
       end
 
       node.children.each do |child|
-        convert_quizzes child, qzn
+        qzn = convert_quizzes child, qzn
       end
+
+      qzn
     end
 
     def convert (content)
-      qzn = 1
+      qzn = 0
       doc = Kramdown::Document.new content, input: 'GFM'
-      convert_quizzes doc.root, qzn
+      qzn = convert_quizzes doc.root, qzn
+
+      if qzn > 0
+        link = Kramdown::Element.new :html_element
+        link.value = 'link'
+        link.attr['stylesheet'] = 'rel'
+        link.attr['href'] = '/assets/quiz.css'
+        doc.root.children << link
+      end
+
       doc.to_html
     end
   end
