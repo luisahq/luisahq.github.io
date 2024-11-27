@@ -228,11 +228,10 @@ module Jekyll
       qzn = convert_quizzes doc.root, qzn
 
       if qzn > 0
-        link = Kramdown::Element.new :html_element
-        link.value = 'link'
-        link.attr['stylesheet'] = 'rel'
-        link.attr['href'] = '/assets/quiz.css'
-        doc.root.children << link
+        js = Kramdown::Element.new :html_element
+        js.value = 'script'
+        js.attr['src'] = '/assets/scripts/quiz.js'
+        doc.root.children << js
       end
 
       doc.to_html
