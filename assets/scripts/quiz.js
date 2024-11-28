@@ -1,15 +1,18 @@
 const startButtons = document.querySelectorAll('.quiz-start-button')
 
-startButtons.forEach((startButton, i) => {
-    startButton.removeAttribute('disabled')
-    startButton.textContent = 'Start Quiz'
+startButtons.forEach(el => {
+    el.removeAttribute('disabled')
+    el.textContent = 'Start Quiz'
 
-    startButton.addEventListener('click', (e) => {
-        if (startButton.hasAttribute('disabled'))
-            startButton.removeAttribute('disabled')
-        else startButton.setAttribute('disabled', '')
+    el.addEventListener('click', e => {
+        if (el.hasAttribute('disabled')) el.removeAttribute('disabled')
+        else el.setAttribute('disabled', '')
+        el.classList.add('hidden')
+        el.nextElementSibling.classList.remove('hidden')
+        const id = el.parentElement.id
 
-        startButton.classList.add('hidden')
-        startButton.nextElementSibling.classList.remove('hidden')
+        document
+            .querySelectorAll('.post-content > :not(#' + id + ')')
+            .forEach(el => { el.classList.add('hidden') })
     })
 })

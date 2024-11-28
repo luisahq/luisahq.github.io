@@ -119,25 +119,35 @@ module Jekyll
       quiz['questions'].each do |question| normalize_question question end
     end
 
-    def text_to_ast (text)
+    def parse_inlines (text)
       Kramdown::Document.new(text, input: 'GFM').root.children[0].children
     end
 
-    def convert_question (question, qzn, qn)
+    def parse_blocks (text)
+      Kramdown::Document.new(text, input: 'GFM').root.children
+    end
+
+    def convert_question (question, qzn, qn, qs_size)
       fieldset = Kramdown::Element.new :html_element
       fieldset.value = 'fieldset'
       fieldset.attr['id'] = 'quiz' + qzn.to_s + 'q' + qn.to_s
       legend = Kramdown::Element.new :html_element
       legend.value = 'legend'
-      qn_el = Kramdown::Element.new :strong
-      qn_el.children = [Kramdown::Element.new(:text, qn.to_s + '. ')]
-      legend.children = [qn_el]
+      legend.attr['align'] = 'right'
 
-      text_to_ast(question['question']).each do |node|
-        legend.children << node
+      legend.children = [
+        Kramdown::Element.new(:text, qn.to_s + ' of ' + qs_size.to_s)
+      ]
+
+      q_el = Kramdown::Element.new :html_element
+      q_el.value = 'div'
+      q_el.attr['class'] = 'quiz-question'
+
+      parse_blocks(question['question']).each do |node|
+        q_el.children << node
       end
 
-      fieldset.children = [legend]
+      fieldset.children = [legend, q_el]
 
       if question['type'] == 'shortanswer'
         input = Kramdown::Element.new :html_element
@@ -159,7 +169,7 @@ module Jekyll
           label = Kramdown::Element.new :html_element
           label.value = 'label'
           label.attr['for'] = id
-          label.children = text_to_ast(choice)
+          label.children = parse_inlines choice
           fieldset.children << input << label << Kramdown::Element.new(:br)
           a += 1
         end
@@ -195,7 +205,8 @@ module Jekyll
       qn = 1
 
       quiz['questions'].each do |question|
-        form.children << convert_question(question, qzn, qn)
+        form.children <<
+          convert_question(question, qzn, qn, quiz['questions'].size)
         qn += 1
       end
 

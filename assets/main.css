@@ -323,5 +323,15 @@ table td { border: 1px solid #e8e8e8; }
 
 
 .hidden {
-    display: none;
+    display: none !important;
+}
+
+div.quiz form legend {
+    border: 1px solid grey;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+div.quiz form fieldset + fieldset {
+    margin-top: 1em;
 }
