@@ -322,14 +322,50 @@ table td { border: 1px solid #e8e8e8; }
 /*# sourceMappingURL=main.css.map */
 
 
-.hidden {
-    display: none !important;
+/* .hidden { */
+/*     display: none !important; */
+/* } */
+
+.invisible {
+    visibility: hidden !important;
+}
+
+div.quiz {
+    border: 1px solid grey;
+    padding: .5em;
+}
+
+.quiz-topic {
+    font-weight: bold;
+}
+
+.quiz-start, .quiz-end-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1em;
+}
+
+div.quiz form,
+div.quiz.active .quiz-start,
+div.quiz.attempted .quiz-start,
+div.quiz.complete .quiz-start,
+div.quiz.active .quiz-retry-button,
+div.quiz.active .quiz-concede-button,
+div.quiz.attempted:not(.active) .quiz-submit-button,
+div.quiz.attempted:not(.active) .quiz-cancel-button,
+div.quiz.complete:not(.active) .quiz-submit-button,
+div.quiz.complete:not(.active) .quiz-cancel-button {
+    display: none;
+}
+
+div.quiz.active form, div.quiz.attempted form, div.quiz.complete form {
+    display: block;
 }
 
 div.quiz form legend {
     border: 1px solid grey;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
+    padding-left: .5em;
+    padding-right: .5em;
 }
 
 div.quiz form fieldset + fieldset {
