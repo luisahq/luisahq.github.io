@@ -371,3 +371,15 @@ div.quiz form legend {
 div.quiz form fieldset + fieldset {
     margin-top: 1em;
 }
+
+div.quiz fieldset[data-correct='correct']::after {
+    content: 'correct';
+}
+
+div.quiz fieldset[data-correct='partial']::after {
+    content: 'partial';
+}
+
+div.quiz fieldset[data-correct='incorrect']::after {
+    content: 'incorrect';
+}

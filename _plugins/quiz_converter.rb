@@ -139,6 +139,7 @@ module Jekyll
       fieldset = Kramdown::Element.new :html_element
       fieldset.value = 'fieldset'
       fieldset.attr['id'] = 'quiz' + qzn.to_s + 'q' + qn.to_s
+      fieldset.attr['data-question-type'] = question['type']
 
       if question.has_key? 'answer'
         if question['answer'].instance_of?(String)
@@ -236,7 +237,6 @@ module Jekyll
       form.value = 'form'
       form.attr['action'] = ''
       form.attr['method'] = 'get'
-      # form.attr['class'] = 'hidden'
       qn = 1
 
       quiz['questions'].each do |question|
