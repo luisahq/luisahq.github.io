@@ -60,7 +60,7 @@ function save () {
 
             f
                 .querySelectorAll('input')
-                .forEach((el, i) => if (el.checked) answers.push(i + 1))
+                .forEach((el, i) => { if (el.checked) answers.push(i + 1) })
 
             localStorage.setItem(f.id, answers.map(n => n.toString()).join(','))
         })
@@ -69,20 +69,20 @@ function save () {
 
     quiz
         .querySelectorAll('fieldset')
-        .forEach(f => if (f.dataset.correct !== 'correct') ++notCorrect)
+        .forEach(f => { if (f.dataset.correct !== 'correct') ++notCorrect })
 
     localStorage.setItem(quiz.id, notCorrect > 0 ? 'attempted' : 'complete')
 }
 
 function activateQuiz (el) {
-    quiz.classList.add('active')
+    el.classList.add('active')
     document
         .querySelectorAll('.post-content > :not(#' + el.id + ')')
         .forEach(el => { el.classList.add('invisible') })
 }
 
 function deactivateQuiz (el) {
-    quiz.classList.remove('active')
+    el.classList.remove('active')
     document
         .querySelectorAll('.post-content > :not(#' + el.id + ')')
         .forEach(el => { el.classList.remove('invisible') })
@@ -91,8 +91,7 @@ function deactivateQuiz (el) {
 document.querySelectorAll('.quiz-start-button').forEach(el => {
     el.removeAttribute('disabled')
     el.textContent = 'Start Quiz'
-    const quiz = parentUntil(el, 'div.quiz')
-    el.addEventListener('click', e => activateQuiz(quiz))
+    el.addEventListener('click', e => activateQuiz(parentUntil(el, 'div.quiz')))
 })
 
 document.querySelectorAll('.quiz-cancel-button').forEach(el => {

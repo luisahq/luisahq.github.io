@@ -18,11 +18,19 @@ module Jekyll
         raise 'Question must have a type.'
       end
 
-      question['type'] = question['type'].delete(' ').downcase
+      type = question['type'].split.filter{ |s| s != '' }
 
-      if question['type'] != 'shortanswer' &&
-         question['type'] != 'multiplechoice'
-        raise 'Question type must be either short answer or multiple choice.'
+      if type.size > 1
+        question['type'] = type.map{ |s| s[0].downcase }.join
+      else
+        question['type'] = type
+      end
+
+      if question['type'] != 'sa' &&
+         question['type'] != 'mc' &&
+         question['type'] != 'ma'
+        raise 'Question type must be either short answer, multiple choice, or '\
+              'multiple answer.'
       end
     end
 
@@ -51,11 +59,11 @@ module Jekyll
 
       normalize_question_type question
 
-      if question['type'] == 'shortanswer'
-        if !question.has_key? 'answer'
-          raise 'Short answer question must have an "answer" key.'
-        end
+      if !question.has_key? 'answer'
+        raise 'Question must have an "answer" key.'
+      end
 
+      if question['type'] == 'sa'
         if !question['answer'].instance_of? String
           raise 'Short answer answer must be a string.'
         end
@@ -69,9 +77,9 @@ module Jekyll
         end
       end
 
-      if question['type'] == 'multiplechoice'
+      if question['type'] == 'mc' || question['type'] == 'ma'
         if !question.has_key? 'choices'
-          raise 'Multiple choice question must have a "choices" key.'
+          raise 'Multiple choice/answer question must have a "choices" key.'
         end
 
         if !question['choices'].instance_of? Array
@@ -80,31 +88,22 @@ module Jekyll
 
         question['choices'].each do |choice|
           if !choice.instance_of? String
-            raise 'Multiple choice option must be a string.'
+            raise 'Choice must be a string.'
           end
         end
 
-        if !question.has_key?('answer') && !question.has_key?('answers')
-          raise 'Multiple choice question must have an "answer[s]" key.'
-        end
-
-        if question.has_key?('answer') && question.has_key?('answers')
-          raise 'Multiple choice question cannot have both "answer" and '\
-                '"answers" keys.'
-        end
-
-        if question.has_key? 'answer'
-          if !question['answer'].is_a? Integer
+        if question['type'] == 'mc' && !question['answer'].is_a?(Integer)
             raise 'Multiple choice answer must be an integer.'
-          end
-        else
-          if !question['answers'].instance_of? Array
-            raise 'Answers must be an array.'
+        end
+
+        if question['type'] == 'ma'
+          if !question['answer'].instance_of? Array
+            raise 'Multiple answer question answer must be an array.'
           end
 
-          question['answers'].each do |answer|
+          question['answer'].each do |answer|
             if !answer.is_a? Integer
-              raise 'Multiple choice answer must be an integer.'
+              raise 'Multiple answer question answer must only have integers.'
             end
           end
         end
@@ -113,7 +112,7 @@ module Jekyll
 
     def normalize_quiz (quiz)
       if !quiz.has_key? 'questions'
-        raise 'Quiz does not have any questions.'
+        raise 'Quiz must have at least one question.'
       end
 
       if !quiz['questions'].instance_of? Array
@@ -141,14 +140,12 @@ module Jekyll
       fieldset.attr['id'] = 'quiz' + qzn.to_s + 'q' + qn.to_s
       fieldset.attr['data-question-type'] = question['type']
 
-      if question.has_key? 'answer'
-        if question['answer'].instance_of?(String)
-          fieldset.attr['data-answer'] = question['answer']
-        else
-          fieldset.attr['data-answer'] = question['answer'].to_s
-        end
+      if question['type'] == 'sa'
+        fieldset.attr['data-answer'] = question['answer']
+      elsif question['type'] == 'mc'
+        fieldset.attr['data-answer'] = question['answer'].to_s
       else
-        fieldset.attr['data-answer'] = question['answers']
+        fieldset.attr['data-answer'] = question['answer']
           .map{ |n| n.to_s }
           .join(',')
       end
@@ -174,21 +171,20 @@ module Jekyll
 
       fieldset.children = [legend, q_el]
 
-      if question['type'] == 'shortanswer'
+      if question['type'] == 'sa'
         input = Kramdown::Element.new :html_element
         input.value = 'input'
         input.attr['type'] = 'text'
         fieldset.children << input
       else
         qid = 'quiz' + qzn.to_s + 'q' + qn.to_s
-        type = question.has_key?('answer') ? 'radio' : 'checkbox'
         a = 1
 
         question['choices'].each do |choice|
           input = Kramdown::Element.new :html_element
           input.value = 'input'
           id = qid + 'a' + a.to_s
-          input.attr['type'] = type
+          input.attr['type'] = question['type'] == 'mc' ? 'radio' : 'checkbox'
           input.attr['id'] = id
           input.attr['name'] = qid
           label = Kramdown::Element.new :html_element
