@@ -25,13 +25,15 @@ dolor commodo, sagittis sem at, elementum velit.
 topic = "Syntax"
 
 [[questions]]
-type = "short answer"
+type = "short answer" # or "sa"
+# Parsed as block.
 question = "What keyword is used to define a function in Python?"
 answer = "def"
 
 [[questions]]
-type = "multiple choice"
+type = "multiple choice" # or "mc"
 question = "Which of the following is a valid variable name in Python?"
+# Each choice is parsed as inline.
 choices = [
   "`1_variable`",
   "`variable-name`",
@@ -39,7 +41,12 @@ choices = [
   "`class`"
 ]
 answer = 3
+context = "`class` is a keyword in Python."
 ```
+
+<button type="button" class="quiz-clear-button">
+Clear all answers (for demo/testing)
+</button>
 
 Suspendisse tellus ante, lobortis vel dui at, rutrum sagittis justo. Integer
 elementum urna ut lectus viverra, posuere condimentum metus pulvinar. Etiam
@@ -61,6 +68,52 @@ semper orci felis, a elementum magna hendrerit et. Sed hendrerit semper lacus
 sit amet mattis. Sed sollicitudin consequat turpis quis facilisis. Pellentesque
 ornare tortor tortor, a sodales quam vestibulum a. Mauris vel eleifend nisi.
 Nunc at viverra est.
+
+```quiz
+topic = "Control Flow"
+
+[[questions]]
+type = "multiple answer" # or "ma"
+question = """Which of the following looping constructs are available in \
+Python?"""
+choices = [
+  "for",
+  "do while",
+  "loop",
+  "while"
+]
+answer = [1, 4]
+
+[[questions]]
+type = "mc"
+
+# Fenced code blocks for a question have to use opposite delimiter (backtick vs
+# tilde) than that used for the quiz itself:
+question = """Do the following two code blocks have the same behaviour?
+~~~python
+if a:
+    f()
+elif b:
+    g()
+~~~
+~~~python
+if a:
+    f()
+else:
+    if b:
+        g()
+~~~
+"""
+choices = [
+  "Yes",
+  "No"
+]
+answer = 1
+```
+
+<button type="button" class="quiz-clear-button">
+Clear all answers (for demo/testing)
+</button>
 
 Vivamus erat neque, luctus quis mauris laoreet, efficitur rhoncus felis. Lorem
 ipsum dolor sit amet, consectetur adipiscing elit. Etiam nec sodales velit.
