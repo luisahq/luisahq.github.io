@@ -321,11 +321,6 @@ table td { border: 1px solid #e8e8e8; }
 
 /*# sourceMappingURL=main.css.map */
 
-
-/* .hidden { */
-/*     display: none !important; */
-/* } */
-
 .invisible {
     visibility: hidden !important;
 }
@@ -333,6 +328,12 @@ table td { border: 1px solid #e8e8e8; }
 div.quiz {
     border: 1px solid grey;
     padding: .5em;
+}
+
+div.quiz.active,
+div.quiz.attempted,
+div.quiz.complete {
+    border: none;
 }
 
 .quiz-topic {
@@ -349,16 +350,23 @@ div.quiz form,
 div.quiz.active .quiz-start,
 div.quiz.attempted .quiz-start,
 div.quiz.complete .quiz-start,
+div.quiz .quiz-context,
+div.quiz.attempted .quiz-context,
 div.quiz.active .quiz-retry-button,
 div.quiz.active .quiz-concede-button,
 div.quiz.attempted:not(.active) .quiz-submit-button,
 div.quiz.attempted:not(.active) .quiz-cancel-button,
-div.quiz.complete:not(.active) .quiz-submit-button,
-div.quiz.complete:not(.active) .quiz-cancel-button {
+div.quiz.complete .quiz-submit-button,
+div.quiz.complete .quiz-cancel-button,
+div.quiz.complete .quiz-retry-button,
+div.quiz.complete .quiz-concede-button {
     display: none;
 }
 
-div.quiz.active form, div.quiz.attempted form, div.quiz.complete form {
+div.quiz.complete .quiz-context,
+div.quiz.active form,
+div.quiz.attempted form,
+div.quiz.complete form {
     display: block;
 }
 
@@ -372,14 +380,28 @@ div.quiz form fieldset + fieldset {
     margin-top: 1em;
 }
 
-div.quiz fieldset[data-correct='correct']::after {
-    content: 'correct';
+div.quiz fieldset[data-score] legend::after {
+    padding-left: .5em;
+    color: orange;
+    content: '⚫︎';
 }
 
-div.quiz fieldset[data-correct='partial']::after {
-    content: 'partial';
+div.quiz fieldset[data-score='0'] legend::after {
+    color: red;
+    content: '✘';
 }
 
-div.quiz fieldset[data-correct='incorrect']::after {
-    content: 'incorrect';
+div.quiz fieldset[data-score='100'] legend::after {
+    color: green;
+    content: '✔';
+}
+
+div.quiz div.quiz-context {
+    border-top: 1px solid lightgrey;
+    margin-top: .5em;
+    padding-top: .5em;
+}
+
+div.quiz div.quiz-explanation {
+    margin-top: .5em;
 }
