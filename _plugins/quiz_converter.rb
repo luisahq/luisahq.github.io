@@ -23,7 +23,7 @@ module Jekyll
       if type.size > 1
         question['type'] = type.map{ |s| s[0].downcase }.join
       else
-        question['type'] = type
+        question['type'] = type[0]
       end
 
       if question['type'] != 'sa' &&
