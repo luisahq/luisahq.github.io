@@ -121,6 +121,8 @@ function activateQuiz (el) {
     document
         .querySelectorAll('.post-content > :not(#' + el.id + ')')
         .forEach(el => { el.classList.add('invisible') })
+
+    render()
 }
 
 function deactivateQuiz (el) {
@@ -128,11 +130,19 @@ function deactivateQuiz (el) {
     document
         .querySelectorAll('.post-content > :not(#' + el.id + ')')
         .forEach(el => { el.classList.remove('invisible') })
+
+    render()
 }
+
+render()
 
 document.querySelectorAll('.quiz-start-button').forEach(el => {
     el.removeAttribute('disabled')
     el.textContent = 'Start Quiz'
+    el.addEventListener('click', e => activateQuiz(parentUntil(el, 'div.quiz')))
+})
+
+document.querySelectorAll('.quiz-retry-button').forEach(el => {
     el.addEventListener('click', e => activateQuiz(parentUntil(el, 'div.quiz')))
 })
 
@@ -141,4 +151,25 @@ document.querySelectorAll('.quiz-cancel-button').forEach(el => {
         'click',
         e => deactivateQuiz(parentUntil(el, 'div.quiz'))
     )
+})
+
+document.querySelectorAll('.quiz-submit-button').forEach(el => {
+    el.addEventListener('click', e => {
+        save()
+        deactivateQuiz(parentUntil(el, 'div.quiz'))
+    })
+})
+
+document.querySelectorAll('.quiz-concede-button').forEach(el => {
+    el.addEventListener('click', e => {
+        const id = parentUntil(el, 'div.quiz').id
+        const state = localStorage.getItem(id)
+        if (state === null) return
+        localStorage.setItem(id, 'complete')
+        render()
+    })
+})
+
+document.querySelectorAll('.quiz-clear-button').forEach(el => {
+    el.addEventListener('click', e => { localStorage.clear() })
 })
