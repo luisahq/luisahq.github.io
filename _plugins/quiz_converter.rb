@@ -164,10 +164,13 @@ module Jekyll
       q_el = Kramdown::Element.new :html_element
       q_el.value = 'div'
       q_el.attr['class'] = 'quiz-question'
+      q_el.children = parse_blocks(question['question'])
 
-      parse_blocks(question['question']).each do |node|
-        q_el.children << node
-      end
+      # if question['type'] == 'ma'
+      #   maq_p = Kramdown::Element.new :p
+      #   maq_p.children << Kramdown::Element.new(:text, 'Choose all that apply.')
+      #   q_el.children << maq_p
+      # end
 
       fieldset.children = [legend, q_el]
 
@@ -196,6 +199,56 @@ module Jekyll
         end
       end
 
+      context = Kramdown::Element.new :html_element
+      context.value = 'div'
+      context.attr['class'] = 'quiz-context'
+      answer = Kramdown::Element.new :html_element
+      answer.value = 'div'
+      answer.attr['class'] = 'quiz-answer'
+      answer_label = Kramdown::Element.new(:strong)
+      answer_label.children = [Kramdown::Element.new(:text, 'Correct Answer: ')]
+      answer.children = [answer_label]
+
+      if question['type'] == 'sa'
+        answer.children << Kramdown::Element.new(:text, question['answer'])
+      elsif question['type'] == 'mc'
+        parse_inlines(
+          question['choices'][question['answer'] - 1]
+        ).each do |node|
+          answer.children << node
+        end
+      else
+        ul = Kramdown::Element.new :ul
+        question['answer'].each do |i|
+          li = Kramdown::Element.new :li
+          li.children = parse_inlines question['choices'][i - 1]
+          ul.children << li
+        end
+
+        answer.children << ul
+      end
+
+      context.children << answer
+
+      if question.has_key? 'context'
+        explanation = Kramdown::Element.new :html_element
+        explanation.value = 'div'
+        explanation.attr['class'] = 'quiz-explanation'
+        explanation_label = Kramdown::Element.new(:strong)
+        explanation_label.children = [Kramdown::Element.new(
+          :text,
+          'Explanation: '
+        )]
+
+        explanation.children << explanation_label
+        parse_blocks(question['context']).each do |node|
+          explanation.children << node
+        end
+
+        context.children << explanation
+      end
+
+      fieldset.children << context
       fieldset
     end
 
@@ -216,9 +269,10 @@ module Jekyll
       qsn.value = 'div'
       qsn.attr['class'] = 'quiz-questions-number'
 
-      qsn.children = [
-        Kramdown::Element.new(:text, quiz['questions'].size.to_s + ' questions')
-      ]
+      qsn.children = [Kramdown::Element.new(
+        :text,
+        quiz['questions'].size.to_s + ' questions'
+      )]
 
       start_btn = Kramdown::Element.new :html_element
       start_btn.value = 'button'
